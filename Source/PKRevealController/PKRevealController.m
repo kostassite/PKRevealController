@@ -931,7 +931,7 @@ typedef struct
     {
         if (!self.leftView.hidden || !self.rightView.hidden)
         {
-            [self hideRearViews];
+//            [self hideRearViews];
         }
     }
     
