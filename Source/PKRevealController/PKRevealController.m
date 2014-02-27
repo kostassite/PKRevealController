@@ -578,6 +578,12 @@ typedef struct
     [self.view addSubview:self.frontView];
     
     [self addViewController:self.frontViewController container:self.frontView];
+    if (self.leftViewController && !self.rightViewController) {
+        [self addViewController:self.leftViewController container:self.leftView];
+    }
+    if (self.rightViewController && !self.leftViewController) {
+        [self addViewController:self.rightViewController container:self.rightView];
+    }
 }
 
 - (void)setupGestureRecognizers
