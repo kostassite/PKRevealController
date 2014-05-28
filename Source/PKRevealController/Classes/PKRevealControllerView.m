@@ -103,4 +103,13 @@ static NSString *kShadowTransitionAnimationKey = @"shadowTransitionAnimation";
     [self.viewController.view setUserInteractionEnabled:userInteractionEnabled];
 }
 
+#pragma mark - Hidden
+
+-(void)setHidden:(BOOL)hidden{
+    fakeHiddenBool = hidden;
+}
+
+-(BOOL)isHidden{
+    return fakeHiddenBool;
+}
 @end

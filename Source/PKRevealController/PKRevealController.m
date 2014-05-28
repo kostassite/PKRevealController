@@ -579,6 +579,12 @@ typedef struct
     [self.view addSubview:self.frontView];
     
     [self addViewController:self.frontViewController container:self.frontView];
+    if (self.leftViewController && !self.rightViewController) {
+        [self addViewController:self.leftViewController container:self.leftView];
+    }
+    if (self.rightViewController && !self.leftViewController) {
+        [self addViewController:self.rightViewController container:self.rightView];
+    }
 }
 
 - (void)setupGestureRecognizers
@@ -597,9 +603,9 @@ typedef struct
 
 - (void)setRecognizesResetTapOnFrontView:(BOOL)recognizesResetTapOnFrontView
 {
-    if (_recognizesPanningOnFrontView != recognizesResetTapOnFrontView)
+    if (_recognizesResetTapOnFrontView != recognizesResetTapOnFrontView)
     {
-        _recognizesPanningOnFrontView = recognizesResetTapOnFrontView;
+        _recognizesResetTapOnFrontView = recognizesResetTapOnFrontView;
         [self updateTapGestureRecognizerPrecence];
     }
 }
@@ -990,8 +996,10 @@ typedef struct
 {
     self.rightView.hidden = YES;
     self.leftView.hidden = YES;
-    [self removeViewController:self.leftViewController];
-    [self removeViewController:self.rightViewController];
+    if (self.leftViewController!=nil && self.rightViewController!=nil) {
+        [self removeViewController:self.leftViewController];
+        [self removeViewController:self.rightViewController];
+    }
     [self.frontView setUserInteractionForContainedViewEnabled:YES];
 }
 
@@ -1075,7 +1083,10 @@ typedef struct
         childController.view.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
         childController.revealController = self;
         [container addSubview:childController.view];
-        [self didMoveToParentViewController:self];
+		if ([container isKindOfClass:[PKRevealControllerView class]]) {
+			((PKRevealControllerView *)container).viewController = childController;
+		}
+        [childController didMoveToParentViewController:self];
     }
 }
 
@@ -1101,15 +1112,16 @@ typedef struct
                                                                            values:[self keyPositionsToState:toState]
                                                                          duration:self.animationDuration];
     
+    __weak PKRevealController *weakSelf = self;
     animation.progressHandler = ^(NSValue *fromValue, NSValue *toValue, NSUInteger index)
     {
-        if ([fromValue CGPointValue].x == [self centerPointForState:PKRevealControllerShowsFrontViewController].x)
+        if ([fromValue CGPointValue].x == [weakSelf centerPointForState:PKRevealControllerShowsFrontViewController].x)
         {
-            [self updateRearViewVisibilityForFrontViewPosition:[toValue CGPointValue]];
+            [weakSelf updateRearViewVisibilityForFrontViewPosition:[toValue CGPointValue]];
         }
         else
         {
-            [self updateRearViewVisibility];
+            [weakSelf updateRearViewVisibility];
         }
     };
     
@@ -1117,13 +1129,13 @@ typedef struct
     {
         if (finished)
         {
-            [self updateRearViewVisibility];
+            [weakSelf updateRearViewVisibility];
         }
         
-        [self updateTapGestureRecognizerPrecence];
-        [self updatePanGestureRecognizerPresence];
+        [weakSelf updateTapGestureRecognizerPrecence];
+        [weakSelf updatePanGestureRecognizerPresence];
         
-        [self pk_performBlock:^
+        [weakSelf pk_performBlock:^
         {
             if (completion)
             {
