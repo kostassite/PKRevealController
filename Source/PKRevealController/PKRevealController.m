@@ -291,6 +291,7 @@ typedef struct
     }
     else
     {
+        self.state = toState;
         self.frontView.layer.position = toPoint;
     }
 }
